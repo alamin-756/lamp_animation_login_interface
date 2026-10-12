@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pull the Cord | My Profile</title>
+
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{--gold:#ffd166;--bg:#080d18}
+
+body{min-height:100vh;overflow-x:hidden;font-family:Arial,sans-serif;color:#fff;background:radial-gradient(ellipse at 20% 75%,#302719,transparent 40%),linear-gradient(120deg,#111b2a,#080d18 70%)}
+
+.scene{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:flex-end;padding:35px 8%;isolation:isolate}
+
+.ambient{position:absolute;inset:0 auto 0 0;width:55%;background:#ffbe4a;filter:blur(100px);opacity:0;transition:opacity 1s;z-index:-1;pointer-events:none}
+
+body.lit .ambient{opacity:.18}
+
+.ground{position:absolute;bottom:0;left:0;width:100%;height:55px;background:linear-gradient(#242938,#111520);border-top:2px solid #353340;z-index:-1}
+
+.lamp-post{position:absolute;left:9%;bottom:53px;width:18px;height:65vh;min-height:300px;max-height:600px;background:linear-gradient(90deg,#171c28,#697080,#161a24);border-radius:8px;box-shadow:8px 0 20px #0007}
+
+.lamp-post:before{content:"";position:absolute;left:-18px;bottom:-12px;width:54px;height:25px;border-radius:8px;background:linear-gradient(#525768,#171c28)}
+
+.arm{position:absolute;left:6px;top:15px;width:150px;height:12px;border-radius:8px;background:linear-gradient(#646a78,#272d3b)}
+
+.arm:after{content:"";position:absolute;right:-5px;top:-7px;width:12px;height:26px;border-radius:6px;background:#353c4b}
+
+.shade{position:absolute;top:27px;left:125px;width:75px;height:38px;background:linear-gradient(145deg,#4b5260,#171b26);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%)}
+
+.bulb{position:absolute;left:155px;top:60px;width:16px;height:16px;border-radius:50%;background:#55505a;transition:.5s;z-index:2}
+
+.light-beam{position:absolute;top:58px;left:67px;width:195px;height:320px;background:linear-gradient(to bottom,#ffd16680,#ffd16618 55%,transparent);clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);opacity:0;transition:opacity 1s;pointer-events:none}
+
+body.lit .bulb{background:#fff4c3;box-shadow:0 0 12px 7px #ffd166,0 0 50px 24px #ffc247a0}
+
+body.lit .light-beam{opacity:1}
+
+.cord{position:absolute;top:65px;left:171px;width:3px;height:125px;background:#c0b9b0;transform-origin:top;z-index:5;cursor:grab;touch-action:none}
+
+.cord:after{content:"";position:absolute;bottom:-9px;left:-5px;width:13px;height:18px;border-radius:50%;background:linear-gradient(90deg,#79572b,#ffd166,#8b6028);box-shadow:0 2px 5px #0008}
+
+.cord.dragging{cursor:grabbing}
+
+.hint{position:absolute;left:5%;top:52%;color:#c4ccda;font-size:13px;line-height:1.9;animation:pulse 2s infinite;pointer-events:none}
+
+@keyframes pulse{50%{opacity:.5}}
+
+.panel{display:none;width:min(450px,100%);max-height:85vh;overflow-y:auto;padding:32px;border:1px solid #ffffff20;border-radius:22px;background:#101725ed;box-shadow:0 25px 80px #0009;backdrop-filter:blur(15px);z-index:6}
+
+.panel.active{display:block;animation:reveal .45s ease both}
+
+@keyframes reveal{from{opacity:0;transform:translateX(25px) scale(.98)}to{opacity:1;transform:translateX(0) scale(1)}}
+
+h1{text-align:center;font-size:28px;margin-bottom:10px}
+
+.subtitle{text-align:center;color:#aab4c7;font-size:13px;line-height:1.7;margin-bottom:24px}
+
+.field{margin-bottom:17px}
+
+.field label{display:block;font-size:13px;margin-bottom:8px;color:#dce3ef}
+
+.field input{width:100%;padding:13px;border:1px solid #394357;border-radius:10px;background:#080e1b;color:white;font:inherit;font-size:14px;outline:none}
+
+.field input:focus{border-color:var(--gold)}
+
+.btn{width:100%;min-height:45px;padding:12px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:8px}
+
+.primary{border:none;color:#171923;background:linear-gradient(100deg,#ffca60,#ffe29a)}
+
+.secondary{border:1px solid #ffffff25;color:var(--gold);background:#ffffff0c}
+
+.switch{margin-top:20px;color:#aab4c7;text-align:center;font-size:13px}
+
+.switch a{color:var(--gold);text-decoration:none}
+
+.message{margin-top:13px;text-align:center;font-size:13px;line-height:1.6;color:var(--gold);overflow-wrap:anywhere}
+
+.hidden{display:none!important}
+
+.profile-panel{text-align:center;width:min(450px,100%)}
+
+.avatar{display:block;width:145px;height:145px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);margin:12px auto 18px;background:#202b40}
+
+.profile-name{font-size:27px;margin:0 0 8px}
+
+.role{color:var(--gold);font-size:13px;margin-bottom:22px}
+
+.profile-note{color:#aab4c7;font-size:13px;line-height:1.7;margin-bottom:18px}
+
+.photo-label{display:block;cursor:pointer;margin-top:10px}
+
+.photo-label input{display:none}
+
+.bottom-hint{position:absolute;bottom:18px;left:0;right:0;padding:0 12px;text-align:center;color:#8791a4;font-size:12px;pointer-events:none}
+
+@media(max-width:700px){
+
+.scene{justify-content:center;align-items:flex-end;padding:220px 15px 65px}
+
+.lamp-post{left:7%;top:25px;bottom:auto;height:150px;min-height:0;width:10px}
+
+.lamp-post:before{left:-12px;bottom:-10px;width:34px;height:17px}
+
+.arm{width:100px}.shade{left:82px;width:57px}.bulb{left:104px}
+
+.light-beam{left:40px;width:140px;height:200px}
+
+.cord{left:125px;height:70px}
+
+.hint{top:140px;left:42%;font-size:11px}
+
+.panel{padding:24px 19px;max-height:72vh}
+
+.avatar{width:115px;height:115px}.bottom-hint{font-size:10px}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<main class="scene">
+
+<div class="ambient"></div><div class="ground"></div>
+
+<div class="lamp-post">
+
+  <div class="arm"></div><div class="shade"></div><div class="bulb"></div><div class="light-beam"></div>
+
+  <div class="cord" id="cord" role="button" tabindex="0" aria-label="Pull the lamp cord"></div>
+
+</div>
+
+<p class="hint" id="hint">↓ Pull the cord<br>to turn on the light</p>
+
+
+
+<section class="panel" id="loginPanel">
+
+  <h1>Welcome Back</h1>
+
+  <p class="subtitle">Enter your details, then click Login or pull the lamp cord.</p>
+
+  <form id="loginForm">
+
+    <div class="field"><label for="loginEmail">Email Address</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" required></div>
+
+    <div class="field"><label for="loginPassword">Password</label><input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password" required></div>
+
+    <button class="btn primary" type="button" id="loginButton">Login</button>
+
+  </form>
+
+  <p class="message" id="loginMessage" aria-live="polite"></p>
+
+  <p class="switch">New here? <a href="#" id="openSignup">Create Account</a></p>
+
+</section>
+
+
+
+<section class="panel" id="signupPanel">
+
+  <h1>Create Account</h1><p class="subtitle">Create your account once, then log in with your details.</p>
+
+  <form id="signupForm">
+
+    <div class="field"><label for="signupName">Your Name</label><input id="signupName" type="text" placeholder="Enter your name" required></div>
+
+    <div class="field"><label for="signupEmail">Email Address</label><input id="signupEmail" type="email" placeholder="you@example.com" required></div>
+
+    <div class="field"><label for="signupPassword">Create Password</label><input id="signupPassword" type="password" minlength="6" placeholder="At least 6 characters" required></div>
+
+    <div class="field"><label for="confirmPassword">Confirm Password</label><input id="confirmPassword" type="password" minlength="6" placeholder="Enter password again" required></div>
+
+    <button class="btn primary" type="submit">Create Account</button>
+
+  </form>
+
+  <p class="message" id="signupMessage" aria-live="polite"></p>
+
+  <p class="switch"><a href="#" id="openLogin">Back to Login</a></p>
+
+</section>
+
+
+
+<section class="panel profile-panel" id="profilePanel">
+
+  <img class="avatar" id="profilePhoto" alt="Profile photo">
+
+  <h1 class="profile-name" id="profileName">Your Name</h1>
+
+  <p class="role">MY PERSONAL PROFILE</p>
+
+  <div class="field" style="text-align:left">
+    <label for="profilePresentAddress">Present Address</label>
+    <input id="profilePresentAddress" type="text" placeholder="Enter your present address" autocomplete="street-address">
+  </div>
+  <div class="field" style="text-align:left">
+    <label for="profilePermanentAddress">Permanent Address</label>
+    <input id="profilePermanentAddress" type="text" placeholder="Enter your permanent address" autocomplete="street-address">
+  </div>
+  <div class="field" style="text-align:left">
+    <label for="profileUniversity">University Name</label>
+    <input id="profileUniversity" type="text" placeholder="Enter your university" autocomplete="organization">
+  </div>
+  <p class="profile-note">Edit your details and save whenever you want.</p>
+  <button class="btn primary" type="button" id="saveProfileButton">Save Profile</button>
+  <label class="btn secondary photo-label" for="changePhoto">Change Profile Picture
+
+    <input type="file" id="changePhoto" accept="image/*">
+
+  </label>
+
+  <button class="btn primary" type="button" id="logoutButton">Logout</button>
+
+  <p class="message" id="profileMessage" aria-live="polite"></p>
+
+</section>
+
+
+
+<p class="bottom-hint" id="bottomHint">Pull the golden cord to reveal Login</p>
+
+</main>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const cord = $("cord");
+
+const panels = {login:$("loginPanel"), signup:$("signupPanel"), profile:$("profilePanel")};
+
+// Keep accounts under a stable key so logging out never deletes them.
+
+// Older keys are checked too, so accounts from earlier versions can be recovered.
+
+const ACCOUNTS_KEY = "pullTheCordAccounts";
+
+const LEGACY_ACCOUNT_KEYS = ["lampPortfolioAccounts_v2", "lampPortfolioAccounts_v1"];
+
+const ACTIVE_KEY = "lampPortfolioActiveEmail_v2";
+
+let accounts = loadAccounts();
+
+let currentAccount = null;
+
+let stage = "off";
+
+let dragging = false, startY = 0, distance = 0;
+
+
+
+function loadAccounts(){
+
+  try {
+
+    let raw = localStorage.getItem(ACCOUNTS_KEY);
+
+    if (!raw) {
+
+      for (const key of LEGACY_ACCOUNT_KEYS) {
+
+        raw = localStorage.getItem(key);
+
+        if (raw) {
+
+          // Migrate existing accounts to the stable key.
+
+          localStorage.setItem(ACCOUNTS_KEY, raw);
+
+          break;
+
+        }
+
+      }
+
+    }
+
+    const data = JSON.parse(raw || "[]");
+
+    return Array.isArray(data) ? data.filter(a =>
+
+      a && typeof a.email === "string" && typeof a.password === "string"
+
+    ) : [];
+
+  } catch (error) {
+
+    console.error("Could not read saved accounts:", error);
+
+    return [];
+
+  }
+
+}
+
+function saveAccounts(){
+
+  try {
+
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+
+    // Keep the previous key in sync as a compatibility backup.
+
+    localStorage.setItem("lampPortfolioAccounts_v2", JSON.stringify(accounts));
+
+    return true;
+
+  } catch (error) {
+
+    alert("Account data could not be saved by this browser. Open this page with VS Code Live Server and use the same browser/URL each time.");
+
+    console.error("Could not save accounts:", error);
+
+    return false;
+
+  }
+
+}
+
+function showPanel(name){
+
+  Object.values(panels).forEach(panel => panel.classList.remove("active"));
+
+  if(name) panels[name].classList.add("active");
+
+}
+
+function setLamp(on){ document.body.classList.toggle("lit", on); }
+
+function placeholderPhoto(){
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" rx="100" fill="#202b40"/><circle cx="100" cy="70" r="36" fill="#ffd166"/><path d="M25 200 Q30 115 100 120 Q170 115 175 200" fill="#ffd166"/></svg>`;
+
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+
+}
+
+function renderProfile(){
+
+  if(!currentAccount) return;
+
+  $("profileName").textContent = currentAccount.name;
+
+  $("profilePhoto").src = currentAccount.photo || placeholderPhoto();
+  $("profilePresentAddress").value = currentAccount.presentAddress || currentAccount.address || "";
+  $("profilePermanentAddress").value = currentAccount.permanentAddress || "";
+  $("profileUniversity").value = currentAccount.university || "";
+
+  $("profileMessage").textContent = "";
+
+}
+
+function updateHint(){
+
+  if(stage === "off"){
+
+    $("hint").innerHTML = "↓ Pull the cord<br>to turn on the light";
+
+    $("bottomHint").textContent = "Pull the golden cord to reveal Login";
+
+  } else if(stage === "login" || stage === "signup"){
+
+    $("hint").innerHTML = "↓ Pull the cord<br>to log in";
+
+    $("bottomHint").textContent = "Enter email/password, then click Login or pull the cord";
+
+  } else {
+
+    $("hint").innerHTML = "↓ Pull again<br>to log out";
+
+    $("bottomHint").textContent = "Your profile is open. Click Logout or pull the cord to log out.";
+
+  }
+
+}
+
+function logout(){
+
+  currentAccount = null;
+
+  localStorage.removeItem(ACTIVE_KEY);
+
+  $("loginForm").reset();
+
+  $("loginMessage").textContent = "";
+
+  stage = "off";
+
+  setLamp(false);
+
+  showPanel(null);
+
+  updateHint();
+
+}
+
+function loginAccount(){
+  accounts = loadAccounts();
+  const email = $("loginEmail").value.trim().toLowerCase();
+  const password = $("loginPassword").value;
+  if(!email || !password){
+    $("loginMessage").textContent = "Enter your email and password, then click Login or pull the cord.";
+    return;
+  }
+  const account = accounts.find(a => a.email.trim().toLowerCase() === email && a.password === password);
+  if(!account){
+    $("loginMessage").textContent = "Incorrect email or password. Try again.";
+    return;
+  }
+  currentAccount = account;
+  localStorage.setItem(ACTIVE_KEY, email);
+  stage = "profile";
+  setLamp(true);
+  renderProfile();
+  showPanel("profile");
+  updateHint();
+}
+
+function pullAction(){
+  if(stage === "off"){
+
+    setLamp(true);
+
+    stage = "login";
+
+    showPanel("login");
+
+  } else if(stage === "login"){
+    loginAccount();
+  } else if(stage === "signup"){
+
+    $("signupMessage").textContent = "Complete the account form and use Create Account.";
+
+  } else if(stage === "profile"){
+
+    logout();
+
+  }
+
+  updateHint();
+
+}
+
+cord.addEventListener("pointerdown", event => {
+
+  event.preventDefault(); dragging = true; startY = event.clientY; distance = 0;
+
+  cord.classList.add("dragging"); cord.setPointerCapture(event.pointerId);
+
+});
+
+cord.addEventListener("pointermove", event => {
+
+  if(!dragging) return;
+
+  distance = Math.max(0, Math.min(90, event.clientY - startY));
+
+  cord.style.transform = `translateY(${distance}px)`;
+
+});
+
+function endPull(){
+
+  if(!dragging) return;
+
+  dragging = false; cord.classList.remove("dragging"); cord.style.transform = "translateY(0)";
+
+  if(distance > 25) pullAction();
+
+}
+
+cord.addEventListener("pointerup", endPull);
+
+cord.addEventListener("pointercancel", endPull);
+
+cord.addEventListener("keydown", event => {
+
+  if(event.key === "Enter" || event.key === " "){ event.preventDefault(); pullAction(); }
+
+});
+
+
+
+$("openSignup").addEventListener("click", event => {
+
+  event.preventDefault(); stage = "signup"; showPanel("signup"); updateHint();
+
+});
+
+$("openLogin").addEventListener("click", event => {
+
+  event.preventDefault(); stage = "login"; showPanel("login"); updateHint();
+
+});
+
+
+
+$("signupForm").addEventListener("submit", event => {
+
+  event.preventDefault();
+
+  // Read the latest saved list before checking for duplicate email addresses.
+
+  accounts = loadAccounts();
+
+  const name = $("signupName").value.trim();
+
+  const email = $("signupEmail").value.trim().toLowerCase();
+
+  const password = $("signupPassword").value;
+
+  if(password !== $("confirmPassword").value){
+
+    $("signupMessage").textContent = "Passwords do not match."; return;
+
+  }
+
+  if(accounts.some(a => a.email === email)){
+
+    $("signupMessage").textContent = "This email already has an account. Please log in."; return;
+
+  }
+
+  accounts.push({name,email,password,address:"",university:"",photo:""});
+
+  if(!saveAccounts()){ accounts.pop(); return; }
+
+  $("signupForm").reset();
+
+  $("loginEmail").value = email;
+
+  $("loginPassword").value = "";
+
+  $("signupMessage").textContent = "Account created. Please log in.";
+
+  stage = "login"; showPanel("login"); updateHint();
+
+});
+
+
+
+// The buttons and lamp cord use the same login/logout action.
+
+$("loginButton").addEventListener("click", () => {
+  if(stage === "off") {
+    setLamp(true);
+    stage = "login";
+    showPanel("login");
+    updateHint();
+    return;
+  }
+  if(stage === "login") loginAccount();
+});
+
+
+
+$("logoutButton").addEventListener("click", () => {
+
+  if(stage === "profile") pullAction();
+
+});
+
+
+
+$("loginForm").addEventListener("submit", event => {
+
+  // Pressing Enter behaves like clicking Login.
+
+  event.preventDefault();
+
+  if(stage === "off") {
+
+    setLamp(true);
+
+    stage = "login";
+
+    showPanel("login");
+
+  }
+
+  if(stage === "login") pullAction();
+
+});
+
+
+
+$("saveProfileButton").addEventListener("click", () => {
+  if(!currentAccount) return;
+  const oldPresentAddress = currentAccount.presentAddress || currentAccount.address || "";
+  const oldPermanentAddress = currentAccount.permanentAddress || "";
+  const oldUniversity = currentAccount.university || "";
+  currentAccount.presentAddress = $("profilePresentAddress").value.trim();
+  currentAccount.permanentAddress = $("profilePermanentAddress").value.trim();
+  currentAccount.university = $("profileUniversity").value.trim();
+  if(saveAccounts()){
+    $("profileMessage").textContent = "Present address, permanent address, and university name saved successfully.";
+  } else {
+    currentAccount.presentAddress = oldPresentAddress;
+    currentAccount.permanentAddress = oldPermanentAddress;
+    currentAccount.university = oldUniversity;
+  }
+});
+
+$("changePhoto").addEventListener("change", event => {
+
+  const file = event.target.files && event.target.files[0];
+
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+
+    $("profileMessage").textContent = "Please choose an image file."; event.target.value = ""; return;
+
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+
+    $("profileMessage").textContent = "Please choose an image smaller than 5 MB."; event.target.value = ""; return;
+
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+
+    const image = new Image();
+
+    image.onload = () => {
+
+      const max = 500, scale = Math.min(1, max / Math.max(image.width, image.height));
+
+      const canvas = document.createElement("canvas");
+
+      canvas.width = Math.round(image.width * scale);
+
+      canvas.height = Math.round(image.height * scale);
+
+      canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const oldPhoto = currentAccount.photo;
+
+      currentAccount.photo = canvas.toDataURL("image/jpeg", 0.78);
+
+      if(saveAccounts()){
+
+        $("profilePhoto").src = currentAccount.photo;
+
+        $("profileMessage").textContent = "Profile picture updated and saved.";
+
+      } else {
+
+        currentAccount.photo = oldPhoto;
+
+      }
+
+    };
+
+    image.onerror = () => { $("profileMessage").textContent = "Could not open that image."; };
+
+    image.src = reader.result;
+
+  };
+
+  reader.readAsDataURL(file);
+
+  event.target.value = "";
+
+});
+
+
+
+// Always start logged out. The user must pull the cord and log in again.
+
+localStorage.removeItem(ACTIVE_KEY);
+
+setLamp(false);
+
+showPanel(null);
+
+stage = "off";
+
+updateHint();
+
+</script>
+
+</body>
+
+</html>
